@@ -46,6 +46,22 @@ impl Parser {
     pub fn instruction_type(&self) -> InstructionType {
         self.current_instruction.instruction_type()
     }
+
+    pub fn symbol(&self) -> &str {
+        self.current_instruction.symbol()
+    }
+
+    pub fn dest(&self) -> &str {
+        self.current_instruction.dest()
+    }
+
+    pub fn comp(&self) -> &str {
+        self.current_instruction.comp()
+    }
+
+    pub fn jump(&self) -> &str {
+        self.current_instruction.jump()
+    }
 }
 
 
@@ -108,4 +124,62 @@ mod tests {
         parser.advance();
         assert!(matches!(parser.instruction_type(), InstructionType::C))
     }
+
+    #[test]
+    fn test_instruction_type_given_l_instruction() {
+        let mut parser = Parser::new(String::from("(LOOP)"));
+        parser.advance();
+        assert!(matches!(parser.instruction_type(), InstructionType::L))
+    }
+
+    #[test]
+    fn test_symbol_given_a_instruction() {
+        let mut parser = Parser::new(String::from("@01"));
+        parser.advance();
+        assert_eq!(parser.symbol(), "01");
+    }
+
+    #[test]
+    fn test_symbol_given_l_instruction() {
+        let mut parser = Parser::new(String::from("(LOOP)"));
+        parser.advance();
+        assert_eq!(parser.symbol(), "LOOP");
+    }
+
+    #[test]
+    fn test_c_instruction_given_dest() {
+        let mut parser = Parser::new(String::from("M=1"));
+        parser.advance();
+        assert_eq!(parser.dest(), "M");
+        assert_eq!(parser.comp(), "1");
+        assert_eq!(parser.jump(), "");
+    }
+
+    #[test]
+    fn test_c_instruction_given_jump() {
+        let mut parser = Parser::new(String::from("0;JMP"));
+        parser.advance();
+        assert_eq!(parser.dest(), "");
+        assert_eq!(parser.comp(), "0");
+        assert_eq!(parser.jump(), "JMP");
+    }
+
+    #[test]
+    fn test_c_instruction_given_comp() {
+        let mut parser = Parser::new(String::from("D+1"));
+        parser.advance();
+        assert_eq!(parser.dest(), "");
+        assert_eq!(parser.comp(), "D+1");
+        assert_eq!(parser.jump(), "");
+    }
+
+    #[test]
+    fn test_c_instruction_given_all() {
+        let mut parser = Parser::new(String::from("ADM=D+1;JGT"));
+        parser.advance();
+        assert_eq!(parser.dest(), "ADM");
+        assert_eq!(parser.comp(), "D+1");
+        assert_eq!(parser.jump(), "JGT");
+    }
+
 }
