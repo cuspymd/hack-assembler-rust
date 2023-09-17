@@ -30,33 +30,68 @@ const COMP_DATA: [(&str, &str); 28] = [
     ("D|A", "0010101"),
     ("D|M", "1010101")
 ];
+const DEST_DATA: [(&str, &str); 8] = [
+    ("", "000"),
+    ("M", "001"),
+    ("D", "010"),
+    ("MD", "011"),
+    ("A", "100"),
+    ("AM", "101"),
+    ("AD", "110"),
+    ("AMD", "111")
+];
+const JUMP_DATA: [(&str, &str); 8] = [
+    ("", "000"),
+    ("JGT", "001"),
+    ("JEQ", "010"),
+    ("JGE", "011"),
+    ("JLT", "100"),
+    ("JNE", "101"),
+    ("JLE", "110"),
+    ("JMP", "111")
+];
+
 
 struct Code {
-    comp_table: HashMap<String, String>
+    comp_table: HashMap<String, String>,
+    dest_table: HashMap<String, String>,
+    jump_table:HashMap<String, String>,
 }
 
 impl Code {
     pub fn new() -> Code {
-        let mut comp_table = HashMap::new();
-        for (word, digit_expression) in COMP_DATA.iter() {
-            comp_table.insert(word.to_string(), digit_expression.to_string());
-        }
         Code {
-            comp_table
+            comp_table: Self::create_table(&COMP_DATA),
+            dest_table: Self::create_table(&DEST_DATA),
+            jump_table: Self::create_table(&JUMP_DATA),
         }
+    }
+
+    fn create_table(data: &[(&str, &str)]) -> HashMap<String, String> {
+        let mut table = HashMap::new();
+        for (word, digit_expression) in data.iter() {
+            table.insert(word.to_string(), digit_expression.to_string());
+        }
+        table
     }
     
     pub fn comp(&self, instruction: &str) -> &str {
         self.comp_table.get(instruction).unwrap()
     }
-    
-}
 
+    pub fn dest(&self, instruction: &str) -> &str {
+        self.dest_table.get(instruction).unwrap()
+    }
+
+    pub fn jump(&self, instruction: &str) -> &str {
+        self.jump_table.get(instruction).unwrap()
+    }
+}
 
 
 #[cfg(test)]
 mod tests {
-    use super::{Code, COMP_DATA};
+    use super::{Code, COMP_DATA, DEST_DATA, JUMP_DATA};
 
     #[test]
     fn test_comp() {
@@ -68,5 +103,23 @@ mod tests {
         }
     }
 
-    
+    #[test]
+    fn test_dest() {
+        let code = Code::new();
+        
+        for (word, digit_expression) in DEST_DATA.iter() {
+            assert_eq!(
+                code.dest(word), *digit_expression, "wrong digit for '{}'", word);
+        }
+    }
+
+    #[test]
+    fn test_jump() {
+        let code = Code::new();
+        
+        for (word, digit_expression) in JUMP_DATA.iter() {
+            assert_eq!(
+                code.jump(word), *digit_expression, "wrong digit for '{}'", word);
+        }
+    }
 }
