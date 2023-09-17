@@ -1,4 +1,6 @@
-use std::{io, path::Path};
+use std::{io::{self, Read}, path::Path, fs::File};
+
+use crate::{parser::{Parser, instruction::InstructionType}, code::Code};
 
 struct Assembler {
     
@@ -12,12 +14,38 @@ impl Assembler {
     pub fn run(&self, input_path_str: &str) -> io::Result<()> {
         let input_path = Path::new(input_path_str);
         let folder_path = input_path.parent().unwrap();
-        let file_base_name = input_path.file_stem().unwrap().to_string_lossy().to_string();
+        let file_base_name = input_path.file_stem().unwrap()
+            .to_string_lossy().to_string();
         let output_path = &folder_path.join(format!("{}.hack", &file_base_name));
 
-        let mut file = File::open(solution_file)?;
-        let mut solution_text = String::new();
-        file.read_to_string(&mut solution_text)?;
+        let mut file = File::open(input_path)?;
+        let mut input_text = String::new();
+        file.read_to_string(&mut input_text)?;
+
+        let mut file = File::create(output_path)?;
+
+        // Phase one
+        
+        // Phase two
+        let mut parser = Parser::new(input_text);
+        let code = Code::new();
+
+        while parser.has_more_lines() {
+            parser.advance();
+
+            match parser.instruction_type() {
+                InstructionType::A => {
+                    let symbol = parser.symbol();
+                    
+                },
+                InstructionType::C => {
+                    
+                },
+                InstructionType::L => {
+                    
+                }
+            }
+        }
         
         Ok(())
     }

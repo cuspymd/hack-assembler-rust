@@ -1,15 +1,15 @@
-mod instruction;
-use instruction::{Instruction, InstructionType};
+pub mod instruction;
+pub use instruction::{Instruction, InstructionType};
 
 
-struct Parser {
+pub struct Parser {
     lines: Vec<String>,
     current_line_number: i32,
     current_instruction: Instruction,
 }
 
 impl Parser {
-    fn new(file_text: String) -> Parser {
+    pub fn new(file_text: String) -> Parser {
         Parser {
             lines: Parser::get_valid_lines(&file_text),
             current_line_number: -1,
