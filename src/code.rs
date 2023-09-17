@@ -55,7 +55,7 @@ const JUMP_DATA: [(&str, &str); 8] = [
 pub struct Code {
     comp_table: HashMap<String, String>,
     dest_table: HashMap<String, String>,
-    jump_table:HashMap<String, String>,
+    jump_table: HashMap<String, String>,
 }
 
 impl Code {

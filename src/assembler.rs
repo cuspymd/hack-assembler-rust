@@ -1,17 +1,20 @@
 use std::{io::{Read, Write}, path::Path, fs::File};
-
-use crate::{parser::{Parser, instruction::InstructionType}, code::Code};
+use crate::{parser::{Parser, instruction::InstructionType}, code::Code, symbol_table::SymbolTable};
 
 struct Assembler {
-    
+    symbol_table: SymbolTable,
+    empty_symbol_address: u32,
 }
 
 impl Assembler {
     pub fn new() -> Assembler {
-        Assembler {  }
+        Assembler {
+            symbol_table: SymbolTable::new(),
+            empty_symbol_address: 16,
+        }
     }
 
-    pub fn run(&self, input_path_str: &str) {
+    pub fn run(&mut self, input_path_str: &str) {
         let input_path = Path::new(input_path_str);
         let folder_path = input_path.parent().unwrap();
         let file_base_name = input_path.file_stem().unwrap()
@@ -24,10 +27,30 @@ impl Assembler {
 
         let mut file = File::create(output_path).unwrap();
 
-        // Phase one
-        
-        // Phase two
+        self.run_phase_one(&input_text);
+        self.run_phase_two(&input_text, &mut file);
+    }
+
+    fn run_phase_one(&mut self, input_text: &str) {
+        let mut line_num: u32 = 0;
         let mut parser = Parser::new(input_text);
+
+        while parser.has_more_lines() {
+            parser.advance();
+            match parser.instruction_type() {
+                InstructionType::L => {
+                    let symbol = parser.symbol();
+                    self.symbol_table.add_entry(symbol, line_num);
+                },
+                _ => {
+                    line_num += 1;
+                }
+            }
+        }
+    }
+
+    fn run_phase_two(&mut self, input_text: &str, file: &mut File) {
+        let mut parser = Parser::new(&input_text);
         let code = Code::new();
 
         while parser.has_more_lines() {
@@ -36,7 +59,7 @@ impl Assembler {
             match parser.instruction_type() {
                 InstructionType::A => {
                     let symbol = parser.symbol();
-                    let binary = Self::process_symbol(symbol);
+                    let binary = self.process_symbol(symbol);
                     let line = format!("{}\n", binary);
 
                     file.write(line.as_bytes()).unwrap();
@@ -53,14 +76,31 @@ impl Assembler {
                     file.write(line.as_bytes()).unwrap();
                 },
                 InstructionType::L => {
-                    
                 }
             }
         }
     }
 
-    fn process_symbol(symbol: &str) -> String {
-        let number: u32 = symbol.parse().unwrap();
+    fn process_symbol(&mut self, symbol: &str) -> String {
+        let mut valid_symbol = symbol;
+        let address_str: String;
+
+        if valid_symbol.parse::<u32>().is_err() {
+            let address: u32;
+
+            if self.symbol_table.contains(symbol) {
+                address = self.symbol_table.get_address(symbol);
+            } else {
+                self.symbol_table.add_entry(symbol, self.empty_symbol_address);
+                address = self.empty_symbol_address;
+                self.empty_symbol_address += 1;
+            }
+
+            address_str = address.to_string();
+            valid_symbol = &address_str;
+        } 
+
+        let number: u32 = valid_symbol.parse().unwrap();
         format!("{:016b}", number)
     }
 }
@@ -77,6 +117,13 @@ mod tests {
         test_assembler("./test_data/Add.asm");
         test_assembler("./test_data/MaxL.asm");
         test_assembler("./test_data/PongL.asm");
+    }
+
+    #[test]
+    fn test_assembler_given_symbol() {
+        test_assembler("./test_data/Rect.asm");
+        test_assembler("./test_data/Max.asm");
+        test_assembler("./test_data/Pong.asm");
     }
 
     fn test_assembler(input_path: &str) {
