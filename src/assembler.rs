@@ -1,7 +1,7 @@
 use std::{io::{Read, Write}, path::Path, fs::File};
 use crate::{parser::{Parser, instruction::InstructionType}, code::Code, symbol_table::SymbolTable};
 
-struct Assembler {
+pub struct Assembler {
     symbol_table: SymbolTable,
     empty_symbol_address: u32,
 }
