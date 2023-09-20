@@ -3,7 +3,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/cuspymd/hack-assembler-rust)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/cuspymd/hack-assembler-rust)
 
-This is a Rust implementation of the Hack computer's assembler, as described in Chapter 7 of the [Nand to Tetris](https://www.nand2tetris.org/) course. With this assembler, you can translate Hack Assembly Language code into Hack Machine Language code.
+This is a Rust implementation of the Hack computer's assembler, as described in Chapter 6 of the [Nand to Tetris](https://www.nand2tetris.org/) course. With this assembler, you can translate Hack Assembly Language code into Hack Machine Language code.
 
 ## Installation
 
